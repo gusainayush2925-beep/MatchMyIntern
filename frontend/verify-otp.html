@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify OTP - MatchMyIntern</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .otp-input {
+      width: 50px;
+      height: 60px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      margin: 0 4px;
+    }
+    .otp-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container"><a class="navbar-brand" href="index.html">🚀 MatchMyIntern</a></div>
+  </nav>
+
+  <div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="card fade-in">
+          <div class="card-body p-5 text-center">
+            <div style="font-size: 64px;">📧</div>
+            <h3 class="fw-bold mb-2 mt-3">Verify Your Email</h3>
+            <p class="text-muted mb-4">
+              We've sent a 6-digit OTP to<br>
+              <strong id="emailDisplay" style="color:#6366f1;">your email</strong>
+            </p>
+
+            <form id="otpForm">
+              <div class="d-flex justify-content-center mb-4" id="otpContainer">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" autofocus>
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100 btn-lg mb-3" id="verifyBtn">
+                Verify OTP
+              </button>
+            </form>
+
+            <div class="text-muted mt-3">
+              Didn't receive OTP? 
+              <button id="resendBtn" class="btn btn-link p-0 fw-bold text-decoration-none" style="color:#6366f1;">
+                Resend OTP
+              </button>
+            </div>
+
+            <div class="mt-3">
+              <small class="text-muted" id="timerDisplay"></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const email = localStorage.getItem('verifyEmail') || '';
+    const name = localStorage.getItem('verifyName') || '';
+
+    if (!email) {
+      window.location.href = 'register.html';
+    }
+
+    document.getElementById('emailDisplay').textContent = email;
+
+    const otpInputs = document.querySelectorAll('.otp-input');
+    otpInputs.forEach((input, index) => {
+      input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (!/^\d*$/.test(value)) { e.target.value = ''; return; }
+        if (value && index < otpInputs.length - 1) otpInputs[index + 1].focus();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && index > 0) otpInputs[index - 1].focus();
+      });
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        const digits = paste.replace(/\D/g, '').split('').slice(0, 6);
+        digits.forEach((digit, i) => { if (otpInputs[i]) otpInputs[i].value = digit; });
+        if (digits.length === 6) otpInputs[5].focus();
+      });
+    });
+
+    document.getElementById('otpForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const otp = Array.from(otpInputs).map(i => i.value).join('');
+
+      if (otp.length !== 6) {
+        showToast('Please enter complete 6-digit OTP', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('verifyBtn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      const res = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      });
+      const result = await res.json();
+
+      if (res.ok) {
+        showToast('✅ Email verified! Redirecting to login...', 'success');
+        localStorage.removeItem('verifyEmail');
+        localStorage.removeItem('verifyName');
+        setTimeout(() => window.location.href = 'login.html', 1500);
+      } else {
+        showToast(result.message || 'Verification failed', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Verify OTP';
+      }
+    });
+
+    document.getElementById('resendBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('resendBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      const res = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const result = await res.json();
+
+      if (res.ok) {
+        showToast('✅ OTP resent successfully!', 'success');
+        startTimer(60);
+      } else {
+        showToast(result.message || 'Failed to resend', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Resend OTP';
+      }
+    });
+
+    function startTimer(seconds) {
+      const btn = document.getElementById('resendBtn');
+      const timerDisplay = document.getElementById('timerDisplay');
+      btn.disabled = true;
+
+      const interval = setInterval(() => {
+        seconds--;
+        btn.textContent = `Resend in ${seconds}s`;
+        if (seconds <= 0) {
+          clearInterval(interval);
+          btn.disabled = false;
+          btn.textContent = 'Resend OTP';
+          timerDisplay.textContent = '';
+        }
+      }, 1000);
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+      toast.style.cssText = 'top:20px;right:20px;z-index:9999;min-width:300px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1);';
+      toast.innerHTML = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+</body>
+</html>

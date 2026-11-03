@@ -1,0 +1,20 @@
+# Dependencies (Yeh sabse zaroori hai)
+node_modules/
+backend/node_modules/
+
+# Environment variables (Passwords)
+.env
+backend/.env
+
+# Uploads folder
+backend/uploads/
+
+# Android build folders (Bohot bhaari hote hain)
+android/
+MatchMyIntern2/
+.gradle/
+build/
+
+# OS Files
+.DS_Store
+Thumbs.db

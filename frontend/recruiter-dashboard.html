@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Recruiter Dashboard - MatchMyIntern</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">🚀 MatchMyIntern</a>
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <span class="text-white fw-semibold" id="userName">Recruiter</span>
+        <button class="btn btn-warning btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-header">
+    <div class="container">
+      <h1>Recruiter Dashboard 💼</h1>
+      <p class="mb-0 opacity-75" style="position:relative;z-index:2;">Post internships and manage applicants</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row g-4 mb-5">
+      <div class="col-md-4"><div class="stat-card"><h2 id="totalPosts">0</h2><p>Internships Posted</p></div></div>
+      <div class="col-md-4"><div class="stat-card"><h2 id="totalApplicants">0</h2><p>Total Applicants</p></div></div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#postInternshipModal">➕ Post New Internship</button>
+        </div>
+      </div>
+    </div>
+
+    <ul class="nav nav-pills mb-4 justify-content-center">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#myPosts">📋 My Internships</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#applicants">👥 Applicants</button></li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="myPosts"><div id="myInternshipsList"></div></div>
+      <div class="tab-pane fade" id="applicants"><div id="applicantsList"></div></div>
+    </div>
+  </div>
+
+  <!-- Post Modal -->
+  <div class="modal fade" id="postInternshipModal" tabindex="-1">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Post New Internship</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form id="postInternshipForm">
+          <div class="row">
+            <div class="col-md-6 mb-3"><label class="form-label">Job Title *</label><input type="text" id="title" class="form-control" required></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Company *</label><input type="text" id="company" class="form-control" required></div>
+          </div>
+          <div class="mb-3"><label class="form-label">Description *</label><textarea id="description" class="form-control" rows="3" required></textarea></div>
+          <div class="row">
+            <div class="col-md-6 mb-3"><label class="form-label">Location *</label><input type="text" id="location" class="form-control" required></div>
+            <div class="col-md-6 mb-3"><label class="form-label">Stipend</label><input type="text" id="stipend" class="form-control" placeholder="10,000/month"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label">Duration</label><input type="text" id="duration" class="form-control" placeholder="3 months"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Openings</label><input type="number" id="openings" class="form-control" value="1"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Deadline</label><input type="date" id="deadline" class="form-control"></div>
+          </div>
+          <div class="mb-3"><label class="form-label">Required Skills * (comma separated)</label><input type="text" id="skillsRequired" class="form-control" placeholder="Java, Android, XML" required></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="postInternship()">Post Internship</button>
+      </div>
+    </div></div>
+  </div>
+
+  <footer><div class="container"><p class="mb-0 opacity-75">© 2026 MatchMyIntern • Team Avengers</p></div></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/recruiter.js"></script>
+</body>
+</html>
